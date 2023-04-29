@@ -1,35 +1,41 @@
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { AiOutlineSearch } from 'react-icons/ai';
-import { IconContext } from 'react-icons';
-import {
-  StyledSearchbar,
-  StyledSearchForm,
-  StyledSearchFormButton,
-  StyledSearchFormInput,
-} from './Searchbar.styled';
-export const Searchbar = ({ formSubmitHandler }) => {
-  return (
-    <StyledSearchbar>
-      <StyledSearchForm onSubmit={formSubmitHandler}>
-        <StyledSearchFormButton type="submit">
-          <IconContext.Provider value={{ size: '18px' }}>
-            {' '}
-            <AiOutlineSearch />
-          </IconContext.Provider>
-        </StyledSearchFormButton>
 
-        <StyledSearchFormInput
-          name="searchInput"
+const Searchbar = ({ onSubmit }) => {
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleChange = e => {
+    setSearchValue(e.target.value);
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    onSubmit(searchValue);
+  };
+
+  return (
+    <header className="searchbar">
+      <form className="form" onSubmit={handleSubmit}>
+        <button type="submit" className="button">
+          <span className="button-label">Search</span>
+        </button>
+
+        <input
+          className="input"
           type="text"
-          autocomplete="off"
+          autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
+          value={searchValue}
+          onChange={handleChange}
         />
-      </StyledSearchForm>{' '}
-    </StyledSearchbar>
+      </form>
+    </header>
   );
 };
 
 Searchbar.propTypes = {
-  formSubmitHandler: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
 };
+
+export default Searchbar;

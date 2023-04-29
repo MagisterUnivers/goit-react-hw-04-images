@@ -1,110 +1,84 @@
-/**
- * Libraries, services
- */
-import { useCallback, useEffect, useState } from 'react';
-import { BallTriangle } from 'react-loader-spinner';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
-import { getPictures } from 'utils/pixabayAPI';
-/**
- * Components
- */
-import { Modal } from './Modal/Modal';
+import { useState, useEffect } from 'react';
+import Searchbar from './Searchbar/Searchbar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Button from './Button/Button';
+import Spinner from './Loader';
+import Modal from './Modal/Modal';
+import { getPictures } from '../utils/pixabayAPI';
 
-import { Searchbar } from './Searchbar/Searchbar';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Button } from './Button/Button';
-import { StyledSection } from './App.styled';
-
-export const App = () => {
-  const [modalShown, setModalShown] = useState(false);
+function App() {
+  const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [totalImageCount, setTotalImageCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [perPage] = useState(12);
-  const [largeImageUrl, setLargeImageUrl] = useState('');
-  const [alt, setAlt] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
-  const getData = useCallback(() => {
-    setIsLoading(true);
-    getPictures(searchQuery, page, perPage)
-      .then(({ data }) => {
-        setImages(prevState => [...prevState, ...data.hits]);
-        setTotalImageCount(data.totalHits);
-        if (page === 1) {
-          toast(`Wow! We found ${data.totalHits} images for you 😍`);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, [page, perPage, searchQuery]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [error, setError] = useState(null);
+  const perPage = 12;
 
   useEffect(() => {
-    if (!searchQuery) {
+    if (!query) {
       return;
     }
-    getData();
-  }, [searchQuery, page, getData]);
-  useEffect(() => {
-    if (totalImageCount === images.length && totalImageCount !== 0) {
-      toast(`That's all images on this request 😥`);
-    }
-  }, [images, totalImageCount]);
 
-  /**
-   * Own functions
-   */
-  const onSearchSubmit = e => {
-    e.preventDefault();
-    const searchValue = e.target.elements.searchInput.value;
+    setIsLoading(true);
 
-    setSearchQuery(searchValue);
+    getPictures(query, currentPage, perPage)
+      .then(response => {
+        setImages(prevState => [...prevState, ...response.data.hits]);
+      })
+      .catch(error => setError(error.message))
+      .finally(() => setIsLoading(false));
+  }, [query, currentPage, perPage]);
+
+  const handleSearchSubmit = searchQuery => {
+    setQuery(searchQuery);
     setImages([]);
-    setPage(1);
+    setCurrentPage(1);
+    setError(null);
   };
-  const onLoadMoreBtnClick = () => {
-    setPage(prevState => prevState + 1);
+
+  const handleLoadMore = () => {
+    setIsLoading(true);
+    setCurrentPage(prevState => prevState + 1);
   };
-  const toggleModal = (largeImageUrl, alt) => {
-    setModalShown(prevState => !prevState);
-    setLargeImageUrl(largeImageUrl);
-    setAlt(alt);
+
+  const handleImageClick = image => {
+    console.log(image);
+    setSelectedImage(image);
+  };
+
+  const handleModalClose = () => {
+    console.log(selectedImage);
+    setSelectedImage(null);
   };
 
   return (
     <div>
-      <Searchbar formSubmitHandler={onSearchSubmit} />
+      <Searchbar onSubmit={handleSearchSubmit} />
 
-      {isLoading && (
-        <StyledSection $loader>
-          <BallTriangle
-            height={100}
-            width={100}
-            radius={5}
-            color="#3f51b5"
-            ariaLabel="ball-triangle-loading"
-            wrapperClass={{}}
-            wrapperStyle=""
-            visible={true}
-          />
-        </StyledSection>
-      )}
-      {images.length > 0 && (
-        <StyledSection>
-          <ImageGallery data={images} onItemClick={toggleModal} />
-          {images.length !== totalImageCount && (
-            <Button clickHandler={onLoadMoreBtnClick} />
-          )}
-        </StyledSection>
-      )}
-      {modalShown && (
-        <Modal onClose={toggleModal}>
-          <img src={largeImageUrl} alt={alt} />
-        </Modal>
-      )}
+      {error && <p>Oops, something went wrong: {error}</p>}
 
-      <ToastContainer />
+      <ImageGallery images={images} onImageClick={handleImageClick} />
+
+      {isLoading && <Spinner />}
+
+      {!isLoading &&
+        images.length >= perPage &&
+        images.length % perPage === 0 && <Button onClick={handleLoadMore} />}
+
+      {!isLoading &&
+        images.length >= perPage &&
+        images.length % perPage !== 0 && <p>Картинки закончились</p>}
+
+      {selectedImage && (
+        <Modal
+          onClose={handleModalClose}
+          src={selectedImage.largeImageURL}
+          alt={selectedImage.tags}
+        />
+      )}
     </div>
   );
-};
+}
+
+export default App;

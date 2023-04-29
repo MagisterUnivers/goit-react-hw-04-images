@@ -1,24 +1,16 @@
+import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  StyledImageGalleryItem,
-  StyledImageGalleryItemImage,
-} from './ImageGalleryItem.styled';
-export const ImageGalleryItem = ({
-  imageUrl,
-  altText,
-  largeImageUrl,
-  clickHandler,
-}) => {
-  return (
-    <StyledImageGalleryItem
-      onClick={() => clickHandler(largeImageUrl, altText)}
-    >
-      <StyledImageGalleryItemImage src={imageUrl} alt={altText} />
-    </StyledImageGalleryItem>
-  );
-};
+
+const ImageGalleryItem = ({ src, alt, onClick }) => (
+  <li className="gallery-item">
+    <img src={src} alt={alt} onClick={onClick} />
+  </li>
+);
+
 ImageGalleryItem.propTypes = {
-  imageUrl: PropTypes.string.isRequired,
-  altText: PropTypes.string.isRequired,
-  clickHandler: PropTypes.func.isRequired,
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
+
+export default ImageGalleryItem;
