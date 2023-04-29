@@ -71,11 +71,9 @@ function App() {
         images.length % perPage !== 0 && <p>Картинки закончились</p>}
 
       {selectedImage && (
-        <Modal
-          onClose={handleModalClose}
-          src={selectedImage.largeImageURL}
-          alt={selectedImage.tags}
-        />
+        <Modal onClose={handleModalClose}>
+          <img src={selectedImage.largeImageURL} alt={selectedImage.tags} />
+        </Modal>
       )}
     </div>
   );

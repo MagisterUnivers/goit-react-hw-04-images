@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Modal.module.css';
+import { createPortal } from 'react-dom';
+const root = document.querySelector('#root');
 
-const Modal = ({ src, alt, onClose }) => {
+const Modal = ({ children, onClose }) => {
   useEffect(() => {
     const handleKeyDown = e => {
       if (e.code === 'Escape') {
@@ -21,19 +23,27 @@ const Modal = ({ src, alt, onClose }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={handleBackdropClick}>
       <div className={styles.modal}>
-        {console.log('src:', src, 'alt:', alt)}
-        {src && alt && <img className={styles.modalImg} src={src} alt={alt} />}
+        {/* {console.log('src:', this.props.src, 'alt:', this.props.alt)}
+        {this.props.src && this.props.alt && (
+          <img
+            className={styles.modalImg}
+            src={this.props.src}
+            alt={this.props.alt}
+          /> */}
+        {children}
       </div>
-    </div>
+    </div>,
+    root
   );
 };
 
 Modal.propTypes = {
-  src: PropTypes.string.isRequired,
-  alt: PropTypes.string.isRequired,
+  // src: PropTypes.string.isRequired,
+  // alt: PropTypes.string.isRequired,
+  children: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
