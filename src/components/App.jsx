@@ -38,7 +38,7 @@ function App() {
   };
 
   const handleLoadMore = () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     setCurrentPage(prevState => prevState + 1);
   };
 
